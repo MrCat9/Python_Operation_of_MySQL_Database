@@ -29,6 +29,20 @@ CREATE TABLE user (
   PRIMARY KEY (userid)
 ) ENGINE=INNODB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8
 
+#数据库
+userid  username
+1       name1
+2       name2
+3       name3
+4       name4
+5       name5
+6       name6
+7       name7
+8       name8
+9       name9
+
+
+
 #
 import pymysql
 conn = pymysql.connect(
