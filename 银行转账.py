@@ -20,7 +20,7 @@ import sys
 import pymysql
 
 class TransferMoney(object):
-    def __init__(self, conn):
+    def __init__(self, conn):  #类初始化
         self.conn = conn
     
     def check_acct_available(self, acctid):
@@ -30,10 +30,10 @@ class TransferMoney(object):
             cursor.execute(sql)
             print('check_acct_available:'+sql)
             rs = cursor.fetchall()
-            if len(rs)!=1:
-                raise Exception('no account id:%s'%acctid)
+            if len(rs)!=1:  #检测账户是否存在
+                raise Exception('no account id:%s'%acctid)  #抛出异常
         finally:
-            cursor.close()
+            cursor.close()  #关闭cursor
     
     def has_enough_money(self, acctid, money):
         cursor = self.conn.cursor()
@@ -42,7 +42,7 @@ class TransferMoney(object):
             cursor.execute(sql)
             print('has_enough_money:'+sql)
             rs = cursor.fetchall()
-            if len(rs)!=1:
+            if len(rs)!=1:  #检测转出账户是否有足够的余额
                 raise Exception('account %s has no enough money'%acctid)
         finally:
             cursor.close()   
@@ -50,10 +50,10 @@ class TransferMoney(object):
     def reduce_money(self, acctid, money):
         cursor = self.conn.cursor()
         try:
-            sql = 'update account set money=money-%s where acctid=%s'%(money, acctid)
+            sql = 'update account set money=money-%s where acctid=%s'%(money, acctid)  #转出账户扣款
             cursor.execute(sql)
             print('reduce_money:'+sql)
-            if cursor.rowcount!=1:
+            if cursor.rowcount!=1:  #检测转出账户是否扣款成功
                 raise Exception('account %s reduce money fail'%acctid)
         finally:
             cursor.close()
@@ -61,40 +61,40 @@ class TransferMoney(object):
     def add_money(self, acctid, money):
         cursor = self.conn.cursor()
         try:
-            sql = 'update account set money=money+%s where acctid=%s'%(money, acctid)
+            sql = 'update account set money=money+%s where acctid=%s'%(money, acctid)  #转入账户加款
             cursor.execute(sql)
             print('add money:'+sql)
-            if cursor.rowcount!=1:
+            if cursor.rowcount!=1:  #检测转入账户是否加款成功
                 raise Exception('account %s add money fail'%acctid)
         finally:
             cursor.close()
         
     def transfer(self, source_acctid,target_acctid,money):
         try:
-            self.check_acct_available(source_acctid)
+            self.check_acct_available(source_acctid)  #检查账户存在
             self.check_acct_available(target_acctid)
-            self.has_enough_money(source_acctid, money)
-            self.reduce_money(source_acctid, money)
-            self.add_money(target_acctid, money)
-            self.conn.commit()
+            self.has_enough_money(source_acctid, money)  #检查转出账户有足够的金额
+            self.reduce_money(source_acctid, money)  #转出账户减去转出金额
+            self.add_money(target_acctid, money)  #转入账户加上转入金额
+            self.conn.commit()  #提交事务
         except Exception as e:
-            self.conn.rollback()
-            raise e 
+            self.conn.rollback()  #回滚事务
+            raise e  #抛出异常
 
 if __name__=="__main__":
-    source_acctid = sys.argv[1]
+    source_acctid = sys.argv[1]  #传入三个参数
     target_acctid = sys.argv[2]
     money = sys.argv[3]
     
     conn = pymysql.Connect(host='127.0.0.1', user='root', passwd='123456', port=3306, db='pymysql_test01')
-    tr_money = TransferMoney(conn)
+    tr_money = TransferMoney(conn)  #TransferMoney类
     
     try:
-        tr_money.transfer(source_acctid,target_acctid,money)
+        tr_money.transfer(source_acctid,target_acctid,money)  #方法transfer
     except Exception as e:
         print("error:"+str(e))
     finally:
-        conn.close()    
+        conn.close()    #关闭Connect
 
 #Run Configuration --> 传入3个参数（source_acctid，target_acctid，money）  11 12 100
 #console
